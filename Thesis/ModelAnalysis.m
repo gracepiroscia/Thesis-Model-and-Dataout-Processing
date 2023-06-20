@@ -155,8 +155,8 @@ legend(legend_labels)
 %% Effect on v_t - introducing piecewise plots
 figure(3); set(gcf,'Color','w'); subplot(1,2,1); grid on; hold on;
 m_const = 5; % convergent behaviour for m > 4 as seen in the above plots
-v_i_range = [10,15];
-t1 = [0,1,2];
+v_i_range = [10,15]; %km/hr
+t1 = [0,2,4];  %(s) 
 vf = vf; % take prev value, can change if needed
 
 legend_labels = {};
@@ -175,7 +175,7 @@ for i = 1:length(v_i_range)
     
         % Calculate v_t based off t_d and v_i
         vt = double(v_t(v_i_range(i), vf, td, m_const,time_span));
-        AOC = trapz(time_span, vt)/3.6
+        %AOC = trapz(time_span, vt)/3.6
         p  = plot([0, t1(ii)], [v_i_range(i),v_i_range(i)]); % initial constant velocity
         p.Color = plot_line_colors{color_idx};
 
@@ -190,7 +190,7 @@ for i = 1:length(v_i_range)
         time_span = linspace(0, td, 30); % reset timespan to start at 0
         dt = gradient(time_span); 
         distance = cumsum(vt.*dt).*10/36;
-        distance_offset = v_i_range(i)*t1(ii);
+        distance_offset = v_i_range(i)*5/18*t1(ii); %(m)
         DISTANCE{end+1} = [0, distance_offset, distance+distance_offset];
         VT{end+1} = [v_i_range(i),v_i_range(i),vt];
     end
@@ -206,11 +206,12 @@ subtitle('Velocity with Time', 'FontSize', 14)
 subplot(1,2,2); hold on; grid on;
 color_idx = 1; 
 for i = 1:length(DISTANCE)
-    d = DISTANCE{i};
-    vt = VT{i};
-    p = plot(d(1:2), vt(1:2)); % intital curve
-    p.Color = plot_line_colors{color_idx};
-    p = plot(d(3:end), vt(3:end));
+    p = plot(DISTANCE{i}, VT{i});
+    % d = DISTANCE{i};
+    % vt = VT{i};
+    % p = plot(d(1:2), vt(1:2)); % intital curve
+    % p.Color = plot_line_colors{color_idx};
+    % p = plot(d(3:end), vt(3:end));
     p.Color = plot_line_colors{color_idx};
     color_idx = color_idx +1;
 end
@@ -219,7 +220,7 @@ ylabel('Velocity (km/hr)')
 title(strcat('v_f = ', num2str(vf), 'km/hr, d_{crossing} = ', ...
     num2str(d_crossing), 'm, m_{const} = ', num2str(m_const)), "FontSize", 16)
 subtitle('Velocity with Distance', 'FontSize', 14)
-% legend(legend_labels)
+legend(legend_labels)
 
 
 
