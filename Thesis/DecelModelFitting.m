@@ -6,11 +6,6 @@
 % Things to note so far:
 % - Model below is calibrated for real-life vehicles at a signalised intersection
 %
-%TODO:
-% 0. What to do with nudging trajectories? Do we just say these aren't
-% accounted for in the model and a more complex trajectory could be used (i.e. just more of a 
-% piece-wise analysis at each deceleration event) I think this would be best.
-
 clc
 clf;
 clear

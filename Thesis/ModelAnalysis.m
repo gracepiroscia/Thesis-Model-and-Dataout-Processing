@@ -20,9 +20,16 @@ syms t_d(v_i, v_f, t_1, d_max, m)
 t_d(v_i, v_f, t_1, d_max, m) =  ( d_max - v_i*(5/18)*t_1 )/( (5/18)*v_i + ...
     ( ( 1/6 - 2/((m+2)*(m+3))+ 1/((2*m+2)*(2*m+3)) )/( m^2/((2*m+2)*(m+2)) ) )*(5/18)*(v_f - v_i) ); 
                                     % s/q
+% Constants definition: 
+% ---------------------
 % s = 1/6 - 2/((m+2)*(m+3))+ 1/((2*m+2)*(2*m+3));
 % q = m^2/( (2*m+2)*(m+2) );
 
+% v_t for piecewise model
+syms v_t_pw(v_i, v_f, t_decel, t_1, m, t)                    
+v_t_pw(v_i, v_f, t_decel, t_1, m, t) = v_i + 3.6*( ((1+2*m)^(2+1/m))/(4 * m^2) ) ...
+    * (v_f - v_i)/(3.6 * t_decel * ((1+2*m)^(2+1/m))/4 * 1/((2*m+2)*(m+2)) )  * ...
+    ((t-t_1)^2/t_decel) * (0.5 - 2*((t-t_1)/t_decel)^m/(m+2)  + ((t-t_1)/t_decel)^(2*m)/(2*m+2));
 %% Validate with existing data
 % % (from DecelModelFitting.m plots)
 % m_constant = 5.5; 
@@ -167,19 +174,16 @@ VT = {};
 for i = 1:length(v_i_range)
     
     for ii = 1:length(t1)
-        % First calculate breaking time using v_i, t_1, constant v_f, d_max and
+        % Constant velocity piece:
+        p  = plot([0, t1(ii)], [v_i_range(i),v_i_range(i)]); % initial constant velocity
+        p.Color = plot_line_colors{color_idx};        
+
+
+        % For deceleration piece, first calculate breaking time using v_i, t_1, constant v_f, d_max and
         % m
         td = double(t_d(v_i_range(i), vf, t1(ii), d_crossing, m_const));
-    
-        time_span = linspace(0, td, 30); % time variable
-    
-        % Calculate v_t based off t_d and v_i
-        vt = double(v_t(v_i_range(i), vf, td, m_const,time_span));
-        %AOC = trapz(time_span, vt)/3.6
-        p  = plot([0, t1(ii)], [v_i_range(i),v_i_range(i)]); % initial constant velocity
-        p.Color = plot_line_colors{color_idx};
-
-        time_span = time_span + t1(ii); % shift time range for intitial velocity curve
+        time_span = linspace(t1(ii), td + t1(ii), 30); % time variable
+        vt = double(v_t_pw(v_i_range(i), vf, td, t1(ii), m_const,time_span)); % Calculate v_t based off t_d and v_i
         p = plot(time_span, vt);
         p.Color = plot_line_colors{color_idx};
         color_idx = color_idx +1;
@@ -187,10 +191,9 @@ for i = 1:length(v_i_range)
             ', t_1 = ', num2str(t1(ii)), '=> t_d =  ', num2str(td));
     
         % distance-velocity info 
-        time_span = linspace(0, td, 30); % reset timespan to start at 0
         dt = gradient(time_span); 
         distance = cumsum(vt.*dt).*10/36;
-        distance_offset = v_i_range(i)*5/18*t1(ii); %(m)
+        distance_offset = v_i_range(i)*5/18*t1(ii); %(m) for distance travelled initially
         DISTANCE{end+1} = [0, distance_offset, distance+distance_offset];
         VT{end+1} = [v_i_range(i),v_i_range(i),vt];
     end
@@ -201,17 +204,11 @@ ylabel('Velocity (km/hr)')
 title(strcat('v_f = ', num2str(vf), 'km/hr, d_{crossing} = ', ...
     num2str(d_crossing), 'm, m_{const} = ', num2str(m_const)), "FontSize", 16)
 subtitle('Velocity with Time', 'FontSize', 14)
-% legend(legend_labels)
 
 subplot(1,2,2); hold on; grid on;
 color_idx = 1; 
 for i = 1:length(DISTANCE)
     p = plot(DISTANCE{i}, VT{i});
-    % d = DISTANCE{i};
-    % vt = VT{i};
-    % p = plot(d(1:2), vt(1:2)); % intital curve
-    % p.Color = plot_line_colors{color_idx};
-    % p = plot(d(3:end), vt(3:end));
     p.Color = plot_line_colors{color_idx};
     color_idx = color_idx +1;
 end
@@ -222,12 +219,6 @@ title(strcat('v_f = ', num2str(vf), 'km/hr, d_{crossing} = ', ...
 subtitle('Velocity with Distance', 'FontSize', 14)
 legend(legend_labels)
 
-
-
-% ------------- 
-% Decreasing t_d (for constant v_f, d_max) increases the sharpnest (or max
-% acceleration) of the v_t curve.
-% ---------------
 
 %% Creating Dictionary of Literature markers from model
 
