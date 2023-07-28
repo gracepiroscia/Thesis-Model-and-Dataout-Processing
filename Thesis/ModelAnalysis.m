@@ -221,4 +221,131 @@ legend(legend_labels)
 
 
 %% Creating Dictionary of Literature markers from model
+% Velocity when brakes are first applied - v_brake (km/hr)
+% Time when brakes are first applied - t_brake (s)
+% Calibration parameter m 
+% Deceleration time (t_d)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Max acceleration - a_max (m/s^2)
+% Maximum jerk - jerk_max (m/s^3)
+% Stopping distance (final dist between pedestrian and vehicle) - d_stop (m)
+% Final velocity - v_final (m/s)
+% Distance-to-crossing-brake (distance to crossing when brakes are first applied) - DTC_brake
+% Time-to-zebra-brake (time to pedestrian crossing when brakes are first applied) - TTZ_brake (s)
+
+d_range = 50;% All simulations run over the same range from crossing(m)
+d_traj = [47,49]; % distance travelled by vehicle (should always be < d_range as greater would indicate pedestrian collision) (m)
+v_i_range = [30,40,50]; %km/hr
+t1 = [0,2,3];  %Time when brakes are first applied (s) 
+vf = 0; % All stopping trajectories 
+m_range = linspace(0.05,19.05,3);
+
+i_dict = 1;
+for i = 1:length(v_i_range)
+    
+    for ii = 1:length(t1)
+        for iii = 1:length(d_traj)
+            for iiii = 1:length(m_range)
+       
+                % For deceleration piece, first calculate breaking time using v_i, t_1, m, constant v_f and d_max
+                td = double(t_d(v_i_range(i), vf, t1(ii), d_traj(iii), m_range(iiii)));
+                time_span = linspace(t1(ii), td + t1(ii), 40); % time variable
+    
+                dict(i_dict).v_brake = v_i_range(i); % Store
+                dict(i_dict).t_brake = t1(ii);
+                dict(i_dict).tot_dist_travelled = d_traj(iii);
+                dict(i_dict).m = m_range(iiii);
+                dict(i_dict).t_d = td;
+                dict(i_dict).a_m = (vf - v_i_range(i))/(3.6 * td * ...% using relation instead of measuring directly
+                    ((1+2*m_range(iiii))^(2+1/m_range(iiii)))/4 * 1/((2*m_range(iiii)+2)*(m_range(iiii)+2)) );
+                dict(i_dict).a_m = abs(dict(i_dict).a_m);
+    
+                % Now calculate v_t based off t_d and v_i 
+                vt = double(v_t_pw(v_i_range(i), vf, td, t1(ii), m_range(iiii),time_span)); 
+    
+                % Calculate acceleration series using vt
+                dt = gradient(time_span);
+                at = gradient(vt)./dt;
+                jerk = gradient(at)./dt(1);
+                dict(i_dict).jerk_max = max(abs(jerk));
+                dict(i_dict).final_jerk = abs(jerk(end));
+                dict(i_dict).d_stop = d_range - d_traj(iii);
+                dict(i_dict).v_final = vf;
+                dict(i_dict).DTC_brake = d_range - v_i_range(i)*5/18*t1(ii); %range minus distance travelled during constant traj
+                dict(i_dict).TTZ_brake = dict(i_dict).DTC_brake/v_i_range(i);
+
+                % Store trajectory
+                dict(i_dict).vt_traj = [v_i_range(i),v_i_range(i),vt];
+                dict(i_dict).time = [0,t1(ii), time_span];
+                distance = cumsum(vt.*dt).*10/36;
+                distance_offset = v_i_range(i)*5/18*t1(ii); %(m) for distance travelled initially
+                dict(i_dict).vd_traj = [0, distance_offset, distance+distance_offset];
+
+                % In a reasonable acceleration range:
+                if (dict(i_dict).a_m >= 2) && (dict(i_dict).a_m <= 5)
+                    dict(i_dict).is_reasonable_traj = 1;
+                else
+                    dict(i_dict).is_reasonable_traj = 0;
+                end
+                
+                i_dict = i_dict +1;
+    
+            end 
+        end
+    end
+
+end
+%1 crawl scenatio with v_i = 30, t_b = 2, d_to_crossing_when_crawl_begins
+%=4m, v_f = 5km/hr
+vi_crawl = 30;
+t_b_crawl = 2;
+vf_crawl = 5;
+d_traj_crawl = d_range - 5;
+m_crawl = 19.5;
+
+
+% For deceleration piece, first calculate breaking time using v_i, t_1, m, constant v_f and d_max
+td = double(t_d(vi_crawl, vf_crawl, t_b_crawl, d_traj_crawl, m_crawl));
+time_span = linspace(t_b_crawl, td + t_b_crawl, 40); % time variable
+
+dict(i_dict).v_brake = vi_crawl; % Store
+dict(i_dict).t_brake = t_b_crawl;
+dict(i_dict).tot_dist_travelled = d_traj_crawl;
+dict(i_dict).m = m_crawl;
+dict(i_dict).t_d = td;
+dict(i_dict).a_m = (vf_crawl - vi_crawl)/(3.6 * td * ...% using relation instead of measuring directly
+    ((1+2*m_crawl)^(2+1/m_crawl))/4 * 1/((2*m_crawl+2)*(m_crawl+2)) );
+dict(i_dict).a_m = abs(dict(i_dict).a_m);
+
+% Now calculate v_t based off t_d and v_i 
+vt = double(v_t_pw(vi_crawl, vf_crawl, td, t_b_crawl, m_crawl,time_span)); 
+
+% Calculate acceleration series using vt
+dt = gradient(time_span);
+at = gradient(vt)./dt;
+jerk = gradient(at)./dt(1);
+dict(i_dict).jerk_max = max(abs(jerk));
+dict(i_dict).final_jerk = abs(jerk(end));
+dict(i_dict).d_stop = d_range - d_traj_crawl;
+dict(i_dict).v_final = vf_crawl;
+dict(i_dict).DTC_brake = d_range - vi_crawl*5/18*t_b_crawl; %range minus distance travelled during constant traj
+dict(i_dict).TTZ_brake = dict(i_dict).DTC_brake/vi_crawl;
+
+% Store trajectory
+dict(i_dict).vt_traj = [vi_crawl,vi_crawl,vt];
+dict(i_dict).time = [0,t_b_crawl, time_span];
+distance = cumsum(vt.*dt).*10/36;
+distance_offset = vi_crawl*5/18*t_b_crawl; %(m) for distance travelled initially
+dict(i_dict).vd_traj = [0, distance_offset, distance+distance_offset];
+
+% In a reasonable acceleration range:
+if (dict(i_dict).a_m >= 2) && (dict(i_dict).a_m <= 5)
+    dict(i_dict).is_reasonable_traj = 1;
+else
+    dict(i_dict).is_reasonable_traj = 0;
+end
+
+
+save("dict.mat", "dict");
+
 
