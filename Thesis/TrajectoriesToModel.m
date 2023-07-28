@@ -19,7 +19,7 @@ clear;
 load("dict.mat")
 
 %% Idx's for ideal trajectories
-idxs = [8,11,15,29,55];
+idxs = [8,11,14,29,55];
 
 %% Lets print out the data to be clear the difference in trajectories
 fprintf("-------------------------------------------------------------------------------------\n")

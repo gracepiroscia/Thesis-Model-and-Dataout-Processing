@@ -301,7 +301,7 @@ vi_crawl = 30;
 t_b_crawl = 2;
 vf_crawl = 5;
 d_traj_crawl = d_range - 5;
-m_crawl = 19.5;
+m_crawl = 9.55;
 
 
 % For deceleration piece, first calculate breaking time using v_i, t_1, m, constant v_f and d_max
