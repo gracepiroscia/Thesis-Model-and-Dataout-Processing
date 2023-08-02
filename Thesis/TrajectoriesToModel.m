@@ -85,7 +85,7 @@ set(gcf, "Color", 'w')
 hold on
 for i = 1:length(idxs)
     %plot velocity with distance:
-    dist = dict(idxs(i)).vd_traj;
+    dist = dict(idxs(i)).vd_traj; 
     time_s  = dict(idxs(i)).time;
     frames = time_s.*24;
 

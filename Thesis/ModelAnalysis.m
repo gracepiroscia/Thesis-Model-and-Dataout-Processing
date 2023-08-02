@@ -295,12 +295,12 @@ for i = 1:length(v_i_range)
     end
 
 end
-%1 crawl scenatio with v_i = 30, t_b = 2, d_to_crossing_when_crawl_begins
-%=4m, v_f = 5km/hr
+%% 1 crawl scenatio with v_i = 30, t_b = 2, d_to_crossing_when_crawl_begins
+%=8m, v_f = 5km/hr
 vi_crawl = 30;
 t_b_crawl = 2;
 vf_crawl = 5;
-d_traj_crawl = d_range - 5;
+d_traj_crawl = d_range - 8;
 m_crawl = 9.55;
 
 
