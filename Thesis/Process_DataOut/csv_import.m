@@ -2,7 +2,8 @@
 %
 % Script to process the raw .csv files collected during
 % participant trials for both the objective (unreal engine measurements) 
-% and subjective (Likert-Scale questionnaire) data.
+% and subjective (Likert-Scale questionnaire) data, collating them into a
+% single struct.
 % 
 % Each scenario file per participant for the OBJECTIVE data contains the 
 % information (in order):
@@ -42,7 +43,11 @@ clc;
 clear;
 
 %% Plot data option
+% Will plot per participant per scenario the DTC with time and gaze bool
+% with time. Will wait for user to press any key to continue to next
+% scenario.
 plot_data = false;
+
 
 %% Thresholds 
 dtc_min_x = 10; %uu
@@ -72,7 +77,7 @@ FileNames = {dir(dir_name).name};
                 file_name = str_name;
             end
         end
-        
+
         %Load csv file
         full_fileName = dir_name + "/"+ file_name;
         data_out = readtable(full_fileName, opts);
@@ -88,18 +93,18 @@ FileNames = {dir(dir_name).name};
         col_zone_vec = [];
         DTC_char = data_out.DTC_uu;
         gaze_dir_char = data_out.Estimated_Gaze_FV;
-        
+
         for i = 1:size(data_out,1) %for each row in csv file
-        
+
             % Load current data
             delt = str2double(delta_t_char{i});
             playloc = play_loc_char(i);
             dtc = str2double(DTC_char(i));
             gaze_dir = gaze_dir_char(i);
-        
+
             if i == 1
                 s(i).ElapsedTime_s = delt;
-        
+
                 % only need to convert collision zone loc once (static)
                 col_loc = collision_zone_loc_char(i);
                 xyz_idxs = strfind(col_loc, "=");
@@ -115,11 +120,11 @@ FileNames = {dir(dir_name).name};
                     disp(full_fileName);
                 end
 
-        
+
             else 
                 s(i).ElapsedTime_s = s(i-1).ElapsedTime_s + delt;
             end
-        
+
             % Convert string arrays to vector in the form of [X,Y,Z] positions
             xyz_idxs = strfind(playloc, "=");
             xyz_idxs = xyz_idxs{1,1} + 1;
@@ -130,17 +135,17 @@ FileNames = {dir(dir_name).name};
             y = str2double(playloc( xyz_idxs(2):(space_idxs(2)-1) ));
             z = str2double(playloc( xyz_idxs(3):end));
             s(i).PlayerLoc_uu = [x,y,z];
-        
+
             if (x >= dtc_min_x) && (x <= dtc_max_x)
                 s(i).In_DTC_Thresh = 1;
             else
                 s(i).In_DTC_Thresh = 0;
             end
-        
+
             s(i).CollisionZoneLoc_uu = col_zone_vec;
-        
+
             s(i).DTC_uu = dtc;
-        
+
             xyz_idxs = strfind(gaze_dir, "=");
             xyz_idxs = xyz_idxs{1,1} + 1;
             space_idxs = strfind(gaze_dir," ");
@@ -150,14 +155,14 @@ FileNames = {dir(dir_name).name};
             y = str2double(gaze_dir( xyz_idxs(2):(space_idxs(2)-1) ));
             z = str2double(gaze_dir( xyz_idxs(3):end));
             s(i).EstimatedGazeVec_uu = [x,y,z];
-        
+
             if (x>= gaze_mins_xyz(1) && x<= gaze_maxs_xyz(1)) && (y>= gaze_mins_xyz(2)...
                     && y<= gaze_maxs_xyz(2)) && (z>= gaze_mins_xyz(3) && z<= gaze_maxs_xyz(3))
                 s(i).Is_Looking_at_Vehicle = 1;
             else 
                 s(i).Is_Looking_at_Vehicle = 0;
             end
-        
+
         end
 
         % Store to data struct
@@ -167,7 +172,7 @@ FileNames = {dir(dir_name).name};
         data.(sc_labels{scenario_n})(participant_n).In_DTC_Thresh = vertcat(s.In_DTC_Thresh);
         data.(sc_labels{scenario_n})(participant_n).EstimatedGazeVec_xyz_uu = vertcat(s.EstimatedGazeVec_uu);
         data.(sc_labels{scenario_n})(participant_n).Is_Looking_at_Vehicle = vertcat(s.Is_Looking_at_Vehicle);
-        
+
         % Option to plot
         if plot_data 
             % DTC and trajectory with time
@@ -212,10 +217,39 @@ FileNames = {dir(dir_name).name};
             clf(f1);
             clf(f2);
         end 
-        
+
     end
 end
 
 %% 2. Load SUBJECTIVE, likert questionnaire data
+SheetNames = {"sc1","sc2","sc3","sc4","sc5","sc6","sc7"};
+
+for participant_n = 1:30
+    for scenario_n = 1:7
+        CurrentScenarioSheet = readtable("latin_square_scenario.xlsx", 'Sheet',SheetNames{scenario_n});
+        CurrentScenarioSheet(1:2,:) = []; %delete first + second row 
+        avg_Likert_rating = CurrentScenarioSheet.Var6(participant_n);
+        data.(SheetNames{scenario_n})(participant_n).mean_Likert_rating = avg_Likert_rating;
+
+        if SheetNames{scenario_n} ~= "sc3"
+            data.(SheetNames{scenario_n})(participant_n).noticed_no_driver = ...
+                CurrentScenarioSheet.Var7(participant_n);
+        else
+            data.(SheetNames{scenario_n})(participant_n).noticed_driver = ...
+                CurrentScenarioSheet.Var7(participant_n);
+        end
+
+        if SheetNames{scenario_n} == "sc2"
+            data.(SheetNames{scenario_n})(participant_n).Likert_eHMI_recognition_rating = ...
+                CurrentScenarioSheet.Var8(participant_n);        
+        end
+    end
+end
+
+%% Save struct
+save("data_out.mat", 'data');
+
+
+
 
 
