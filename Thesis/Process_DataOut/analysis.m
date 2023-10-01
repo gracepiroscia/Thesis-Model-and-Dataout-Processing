@@ -1,6 +1,6 @@
 % Author: Grace Piroscia
 %
-% Script to validate triangulation and perform two-way t-tests to determine
+% Script to validate triangulation and perform two-sample t-tests to determine
 % the significance between...
 clc;
 clear;
@@ -69,7 +69,54 @@ stats_eHMI_likert_rating = [mean(eHMI_likert_ratings), median(eHMI_likert_rating
 fprintf("Mean eHMI recognition (Likert): %f\n",stats_eHMI_likert_rating(1));
 fprintf("Median eHMI recognition (Likert): %f\n",stats_eHMI_likert_rating(2));
 
-% Whole comparison
+% Whole comparison: sc2 = eHMI, sc3 = human-driven, sc4 = no eHMI FAV
+mean_Likert = [mean(LIKERT_TRUST_RATINGS(:,2)),mean(LIKERT_TRUST_RATINGS(:,3)),mean(LIKERT_TRUST_RATINGS(:,4))];
+mean_Mean_DTC = [mean(MEAN_DTU(:,2)),mean(MEAN_DTU(:,3)),mean(MEAN_DTU(:,4))];
+mean_Cross_time = [mean(TIME_TO_CROSS(:,2)),mean(TIME_TO_CROSS(:,3)),mean(TIME_TO_CROSS(:,4))];
+mean_Gaze_ratio = [mean(GAZE_RATIO(:,2)),mean(GAZE_RATIO(:,3)),mean(GAZE_RATIO(:,4))];
+SEM_Likert = [SEM(LIKERT_TRUST_RATINGS(:,2)),SEM(LIKERT_TRUST_RATINGS(:,3)),SEM(LIKERT_TRUST_RATINGS(:,4))];
+SEM_Mean_DTC = [SEM(MEAN_DTU(:,2)),SEM(MEAN_DTU(:,3)),SEM(MEAN_DTU(:,4))];
+SEM_Cross_time = [SEM(TIME_TO_CROSS(:,2)),SEM(TIME_TO_CROSS(:,3)),SEM(TIME_TO_CROSS(:,4))];
+SEM_Gaze_ratio = [SEM(GAZE_RATIO(:,2)),SEM(GAZE_RATIO(:,3)),SEM(GAZE_RATIO(:,4))];
+
+
+% T-test
+for i = 1:3
+    for j = 1:3
+        [h_likert(i,j), p_likert(i,j)]  = ttest2(LIKERT_TRUST_RATINGS(:,(i+1)), LIKERT_TRUST_RATINGS(:,(j+1)));
+        [h_meanDTC(i,j), p_meanDTC(i,j)]  = ttest2(MEAN_DTU(:,(i+1)), MEAN_DTU(:,(j+1)));
+        [h_crossTime(i,j), p_crossTime(i,j)]  = ttest2(TIME_TO_CROSS(:,i+1), TIME_TO_CROSS(:,j+1));
+        [h_gazeRatio(i,j), p_gazeRatio(i,j)]  = ttest2(GAZE_RATIO(:,i+1), GAZE_RATIO(:,j+1));
+    end
+end
+% ^ No sig diff. Closest is for Likert between human driven and no eHMI FAV at p = 0.052     
+
+% Plot
+x = 1:3;
+x_labels = {"eHMI FAV", "Human-Driven", "no eHMI FAV"} ;
+figure('Name','Differences in eHMI - all')
+set(gcf,'Color', 'w'); set(gcf, 'Position',  [100, 100, 1100, 700]); subplot(2,2,1)
+bar(x,mean_Likert); hold on;
+e = errorbar(x,mean_Likert, SEM_Likert); grid on; e.Color = 'black'; e.LineWidth = 1;
+set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
+ylabel("Likert Subjective-Trust Score (1-7)", 'FontSize',14)
+subplot(2,2,2)
+bar(x,mean_Mean_DTC); hold on;
+e= errorbar(x,mean_Mean_DTC, SEM_Mean_DTC); grid on;e.Color = 'black'; e.LineWidth = 1;
+ylabel("Mean DTC (uu)", 'FontSize',14); ylim([220,260]);
+set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
+subplot(2,2,3)
+bar(x,mean_Cross_time); hold on;
+e= errorbar(x,mean_Cross_time, SEM_Cross_time); grid on;e.Color = 'black'; e.LineWidth = 1;
+ylabel("Time to Cross DTC-Zone (s)", 'FontSize',14)
+set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
+subplot(2,2,4)
+bar(x,mean_Gaze_ratio); hold on;
+e=errorbar(x,mean_Gaze_ratio, SEM_Gaze_ratio); grid on;e.Color = 'black'; e.LineWidth = 1;
+set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
+ylabel("Gaze Ratio", 'FontSize',14)
+
+
 
 % Comparison with just the partipants who had a Likert rating greater than
 % the median for recognition of the eHMI
