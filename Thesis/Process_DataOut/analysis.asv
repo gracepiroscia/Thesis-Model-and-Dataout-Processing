@@ -171,31 +171,31 @@ set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
 ylabel("Gaze Ratio", 'FontSize',14)
 
 %% Comparison between eHMI, no eHMI FAV and Human-Driven - NORMALISED 
-%% MAKES NO DIFF TO SIGNIFICANCE
 % Whole comparison: sc2 = eHMI, sc3 = human-driven, sc4 = no eHMI FAV
 mean_Likert = [mean(norm_LIKERT_TRUST_RATINGS(:,2)),mean(norm_LIKERT_TRUST_RATINGS(:,3)),mean(norm_LIKERT_TRUST_RATINGS(:,4))];
 mean_Mean_DTC = [mean(norm_MEAN_DTU(:,2)),mean(norm_MEAN_DTU(:,3)),mean(norm_MEAN_DTU(:,4))];
-mean_Cross_time = [mean(norm_TIME_TO_CROSS(:,2)),mean(norm_TIME_TO_CROSS(:,3)),mean(norm_TIME_TO_CROSS(:,4))];
-mean_Gaze_ratio = [mean(norm_GAZE_RATIO(:,2)),mean(norm_GAZE_RATIO(:,3)),mean(norm_GAZE_RATIO(:,4))];
+mean_Cross_time = [mean(norm_TIME_TO_CROSS(:,2)),mean(TIME_TO_CROSS(:,3)),mean(TIME_TO_CROSS(:,4))];
+mean_Gaze_ratio = [mean(GAZE_RATIO(:,2)),mean(GAZE_RATIO(:,3)),mean(GAZE_RATIO(:,4))];
 SEM_Likert = [SEM(norm_LIKERT_TRUST_RATINGS(:,2)),SEM(norm_LIKERT_TRUST_RATINGS(:,3)),SEM(norm_LIKERT_TRUST_RATINGS(:,4))];
 SEM_Mean_DTC = [SEM(norm_MEAN_DTU(:,2)),SEM(norm_MEAN_DTU(:,3)),SEM(norm_MEAN_DTU(:,4))];
-SEM_Cross_time = [SEM(norm_TIME_TO_CROSS(:,2)),SEM(norm_TIME_TO_CROSS(:,3)),SEM(norm_TIME_TO_CROSS(:,4))];
-SEM_Gaze_ratio = [SEM(norm_GAZE_RATIO(:,2)),SEM(norm_GAZE_RATIO(:,3)),SEM(norm_GAZE_RATIO(:,4))];
+SEM_Cross_time = [SEM(TIME_TO_CROSS(:,2)),SEM(TIME_TO_CROSS(:,3)),SEM(TIME_TO_CROSS(:,4))];
+SEM_Gaze_ratio = [SEM(GAZE_RATIO(:,2)),SEM(GAZE_RATIO(:,3)),SEM(GAZE_RATIO(:,4))];
 
 % T-test
 for i = 1:3
     for j = 1:3
-        [h_likert_norm(i,j), p_likert_norm(i,j)]  = ttest2(norm_LIKERT_TRUST_RATINGS(:,(i+1)), norm_LIKERT_TRUST_RATINGS(:,(j+1)));
-        [h_meanDTC_norm(i,j), p_meanDTC_norm(i,j)]  = ttest2(norm_MEAN_DTU(:,(i+1)), norm_MEAN_DTU(:,(j+1)));
-        [h_crossTime_norm(i,j), p_crossTime_norm(i,j)]  = ttest2(norm_TIME_TO_CROSS(:,i+1), norm_TIME_TO_CROSS(:,j+1));
-        [h_gazeRatio_norm(i,j), p_gazeRatio_norm(i,j)]  = ttest2(norm_GAZE_RATIO(:,i+1), norm_GAZE_RATIO(:,j+1));
+        [h_likert(i,j), p_likert(i,j)]  = ttest2(LIKERT_TRUST_RATINGS(:,(i+1)), LIKERT_TRUST_RATINGS(:,(j+1)));
+        [h_meanDTC(i,j), p_meanDTC(i,j)]  = ttest2(MEAN_DTU(:,(i+1)), MEAN_DTU(:,(j+1)));
+        [h_crossTime(i,j), p_crossTime(i,j)]  = ttest2(TIME_TO_CROSS(:,i+1), TIME_TO_CROSS(:,j+1));
+        [h_gazeRatio(i,j), p_gazeRatio(i,j)]  = ttest2(GAZE_RATIO(:,i+1), GAZE_RATIO(:,j+1));
     end
 end
+% ^ No sig diff. Closest is for Likert between human driven and no eHMI FAV at p = 0.052     
 
 % Plot
 x = 1:3;
 x_labels = {"eHMI FAV", "Human-Driven", "no eHMI FAV"} ;
-figure('Name','Differences in eHMI - all, NORMALISED')
+figure('Name','Differences in eHMI - all, NON-normalised')
 set(gcf,'Color', 'w'); set(gcf, 'Position',  [100, 100, 1100, 700]); subplot(2,2,1)
 bar(x,mean_Likert); hold on;
 e = errorbar(x,mean_Likert, SEM_Likert); grid on; e.Color = 'black'; e.LineWidth = 1;

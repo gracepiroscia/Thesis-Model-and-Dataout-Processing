@@ -66,22 +66,26 @@ for participant_n = 1:30
     mean_dtc = [];
     gaze_ratio = [];
     cross_time =[];
+    likert_rating = [];
     for i = 1:7
         mean_dtc = [mean_dtc, data_processed.(sc_labels{i})(participant_n).Mean_DTC_uu];
         gaze_ratio = [gaze_ratio, data_processed.(sc_labels{i})(participant_n).Gaze_Ratio];
         cross_time =[cross_time, data_processed.(sc_labels{i})(participant_n).Cross_Time_s];
+        likert_rating = [likert_rating, data_processed.(sc_labels{i})(participant_n).mean_Likert_rating];
     end
 
     % normalise
     mean_dtc_norm = (mean_dtc - min(mean_dtc))./(max(mean_dtc) - min(mean_dtc));
     gaze_ratio_norm = (gaze_ratio - min(gaze_ratio))./(max(gaze_ratio) - min(gaze_ratio));
     cross_time_norm =(cross_time - min(cross_time))./(max(cross_time) - min(cross_time));
+    likert_rating_norm = (likert_rating - min(likert_rating))./(max(likert_rating) - min(likert_rating));
 
     % Store
     for i = 1:7
         data_processed.(sc_labels{i})(participant_n).norm_Mean_DTC_uu = mean_dtc_norm(i);
         data_processed.(sc_labels{i})(participant_n).norm_Gaze_Ratio = gaze_ratio_norm(i);
         data_processed.(sc_labels{i})(participant_n).norm_Cross_Time_s = cross_time_norm(i);
+        data_processed.(sc_labels{i})(participant_n).norm_Mean_Likert_rating = likert_rating_norm(i);
     end
 
 end
