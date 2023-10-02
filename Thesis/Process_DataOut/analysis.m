@@ -5,7 +5,7 @@
 clc;
 clear;
 %%  Load data
-load("data_out_processed.mat")
+load("Process_DataOut/data_out_processed.mat")
 field_names = {"sc1","sc2","sc3","sc4","sc5","sc6","sc7"};
 
 % Data frames: jth column represents jth scenario. Row i corresponds to
@@ -95,7 +95,7 @@ end
 % Plot
 x = 1:3;
 x_labels = {"eHMI FAV", "Human-Driven", "no eHMI FAV"} ;
-figure('Name','Differences in eHMI - all, NON-normalised')
+figure('Name','Differences in eHMI - all')
 set(gcf,'Color', 'w'); set(gcf, 'Position',  [100, 100, 1100, 700]); subplot(2,2,1)
 bar(x,mean_Likert); hold on;
 e = errorbar(x,mean_Likert, SEM_Likert); grid on; e.Color = 'black'; e.LineWidth = 1;
@@ -143,12 +143,12 @@ for i = 1:3
     end
 end
 % ^ Sig diff between Likert score for no eHMI FAV and human-driven 
-fprintf("Statistical Significance: Filtered by recognition, Likert scale score for Human driven vs no eHMI FAV, p = %f\n", p_likert_f(2,3))
+fprintf("Statistical Significance (Likert): Filtered by recognition, Human driven vs no eHMI FAV, p = %f\n", p_likert_f(2,3))
 
 % Plot
 x = 1:3;
 x_labels = {"eHMI FAV", "Human-Driven", "no eHMI FAV"} ;
-figure('Name','Differences in eHMI - Likert Recognition > 5, NON-normalised')
+figure('Name','Differences in eHMI - Likert Recognition > 5')
 set(gcf,'Color', 'w'); set(gcf, 'Position',  [100, 100, 1100, 700]); subplot(2,2,1)
 bar(x,mean_Likert_filt); hold on;
 e = errorbar(x,mean_Likert_filt, SEM_Likert_filt); grid on; e.Color = 'black'; e.LineWidth = 1;
@@ -172,53 +172,114 @@ ylabel("Gaze Ratio", 'FontSize',14)
 
 %% Comparison between eHMI, no eHMI FAV and Human-Driven - NORMALISED 
 %% MAKES NO DIFF TO SIGNIFICANCE
-% Whole comparison: sc2 = eHMI, sc3 = human-driven, sc4 = no eHMI FAV
-mean_Likert = [mean(norm_LIKERT_TRUST_RATINGS(:,2)),mean(norm_LIKERT_TRUST_RATINGS(:,3)),mean(norm_LIKERT_TRUST_RATINGS(:,4))];
-mean_Mean_DTC = [mean(norm_MEAN_DTU(:,2)),mean(norm_MEAN_DTU(:,3)),mean(norm_MEAN_DTU(:,4))];
-mean_Cross_time = [mean(norm_TIME_TO_CROSS(:,2)),mean(norm_TIME_TO_CROSS(:,3)),mean(norm_TIME_TO_CROSS(:,4))];
-mean_Gaze_ratio = [mean(norm_GAZE_RATIO(:,2)),mean(norm_GAZE_RATIO(:,3)),mean(norm_GAZE_RATIO(:,4))];
-SEM_Likert = [SEM(norm_LIKERT_TRUST_RATINGS(:,2)),SEM(norm_LIKERT_TRUST_RATINGS(:,3)),SEM(norm_LIKERT_TRUST_RATINGS(:,4))];
-SEM_Mean_DTC = [SEM(norm_MEAN_DTU(:,2)),SEM(norm_MEAN_DTU(:,3)),SEM(norm_MEAN_DTU(:,4))];
-SEM_Cross_time = [SEM(norm_TIME_TO_CROSS(:,2)),SEM(norm_TIME_TO_CROSS(:,3)),SEM(norm_TIME_TO_CROSS(:,4))];
-SEM_Gaze_ratio = [SEM(norm_GAZE_RATIO(:,2)),SEM(norm_GAZE_RATIO(:,3)),SEM(norm_GAZE_RATIO(:,4))];
-
-% T-test
-for i = 1:3
-    for j = 1:3
-        [h_likert_norm(i,j), p_likert_norm(i,j)]  = ttest2(norm_LIKERT_TRUST_RATINGS(:,(i+1)), norm_LIKERT_TRUST_RATINGS(:,(j+1)));
-        [h_meanDTC_norm(i,j), p_meanDTC_norm(i,j)]  = ttest2(norm_MEAN_DTU(:,(i+1)), norm_MEAN_DTU(:,(j+1)));
-        [h_crossTime_norm(i,j), p_crossTime_norm(i,j)]  = ttest2(norm_TIME_TO_CROSS(:,i+1), norm_TIME_TO_CROSS(:,j+1));
-        [h_gazeRatio_norm(i,j), p_gazeRatio_norm(i,j)]  = ttest2(norm_GAZE_RATIO(:,i+1), norm_GAZE_RATIO(:,j+1));
-    end
-end
-
-% Plot
-x = 1:3;
-x_labels = {"eHMI FAV", "Human-Driven", "no eHMI FAV"} ;
-figure('Name','Differences in eHMI - all, NORMALISED')
-set(gcf,'Color', 'w'); set(gcf, 'Position',  [100, 100, 1100, 700]); subplot(2,2,1)
-bar(x,mean_Likert); hold on;
-e = errorbar(x,mean_Likert, SEM_Likert); grid on; e.Color = 'black'; e.LineWidth = 1;
-set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
-ylabel("Likert Subjective-Trust Score (1-7)", 'FontSize',14)
-subplot(2,2,2)
-bar(x,mean_Mean_DTC); hold on;
-e= errorbar(x,mean_Mean_DTC, SEM_Mean_DTC); grid on;e.Color = 'black'; e.LineWidth = 1;
-ylabel("Mean DTC (uu)", 'FontSize',14);
-set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
-subplot(2,2,3)
-bar(x,mean_Cross_time); hold on;
-e= errorbar(x,mean_Cross_time, SEM_Cross_time); grid on;e.Color = 'black'; e.LineWidth = 1;
-ylabel("Time to Cross DTC-Zone (s)", 'FontSize',14)
-set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
-subplot(2,2,4)
-bar(x,mean_Gaze_ratio); hold on;
-e=errorbar(x,mean_Gaze_ratio, SEM_Gaze_ratio); grid on;e.Color = 'black'; e.LineWidth = 1;
-set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
-ylabel("Gaze Ratio", 'FontSize',14)
+% % Whole comparison: sc2 = eHMI, sc3 = human-driven, sc4 = no eHMI FAV
+% mean_Likert = [mean(norm_LIKERT_TRUST_RATINGS(:,2)),mean(norm_LIKERT_TRUST_RATINGS(:,3)),mean(norm_LIKERT_TRUST_RATINGS(:,4))];
+% mean_Mean_DTC = [mean(norm_MEAN_DTU(:,2)),mean(norm_MEAN_DTU(:,3)),mean(norm_MEAN_DTU(:,4))];
+% mean_Cross_time = [mean(norm_TIME_TO_CROSS(:,2)),mean(norm_TIME_TO_CROSS(:,3)),mean(norm_TIME_TO_CROSS(:,4))];
+% mean_Gaze_ratio = [mean(norm_GAZE_RATIO(:,2)),mean(norm_GAZE_RATIO(:,3)),mean(norm_GAZE_RATIO(:,4))];
+% SEM_Likert = [SEM(norm_LIKERT_TRUST_RATINGS(:,2)),SEM(norm_LIKERT_TRUST_RATINGS(:,3)),SEM(norm_LIKERT_TRUST_RATINGS(:,4))];
+% SEM_Mean_DTC = [SEM(norm_MEAN_DTU(:,2)),SEM(norm_MEAN_DTU(:,3)),SEM(norm_MEAN_DTU(:,4))];
+% SEM_Cross_time = [SEM(norm_TIME_TO_CROSS(:,2)),SEM(norm_TIME_TO_CROSS(:,3)),SEM(norm_TIME_TO_CROSS(:,4))];
+% SEM_Gaze_ratio = [SEM(norm_GAZE_RATIO(:,2)),SEM(norm_GAZE_RATIO(:,3)),SEM(norm_GAZE_RATIO(:,4))];
+% 
+% % T-test
+% for i = 1:3
+%     for j = 1:3
+%         [h_likert_norm(i,j), p_likert_norm(i,j)]  = ttest2(norm_LIKERT_TRUST_RATINGS(:,(i+1)), norm_LIKERT_TRUST_RATINGS(:,(j+1)));
+%         [h_meanDTC_norm(i,j), p_meanDTC_norm(i,j)]  = ttest2(norm_MEAN_DTU(:,(i+1)), norm_MEAN_DTU(:,(j+1)));
+%         [h_crossTime_norm(i,j), p_crossTime_norm(i,j)]  = ttest2(norm_TIME_TO_CROSS(:,i+1), norm_TIME_TO_CROSS(:,j+1));
+%         [h_gazeRatio_norm(i,j), p_gazeRatio_norm(i,j)]  = ttest2(norm_GAZE_RATIO(:,i+1), norm_GAZE_RATIO(:,j+1));
+%     end
+% end
+% 
+% % Plot
+% x = 1:3;
+% x_labels = {"eHMI FAV", "Human-Driven", "no eHMI FAV"} ;
+% figure('Name','Differences in eHMI - all, NORMALISED')
+% set(gcf,'Color', 'w'); set(gcf, 'Position',  [100, 100, 1100, 700]); subplot(2,2,1)
+% bar(x,mean_Likert); hold on;
+% e = errorbar(x,mean_Likert, SEM_Likert); grid on; e.Color = 'black'; e.LineWidth = 1;
+% set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
+% ylabel("Likert Subjective-Trust Score (1-7)", 'FontSize',14)
+% subplot(2,2,2)
+% bar(x,mean_Mean_DTC); hold on;
+% e= errorbar(x,mean_Mean_DTC, SEM_Mean_DTC); grid on;e.Color = 'black'; e.LineWidth = 1;
+% ylabel("Mean DTC (uu)", 'FontSize',14);
+% set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
+% subplot(2,2,3)
+% bar(x,mean_Cross_time); hold on;
+% e= errorbar(x,mean_Cross_time, SEM_Cross_time); grid on;e.Color = 'black'; e.LineWidth = 1;
+% ylabel("Time to Cross DTC-Zone (s)", 'FontSize',14)
+% set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
+% subplot(2,2,4)
+% bar(x,mean_Gaze_ratio); hold on;
+% e=errorbar(x,mean_Gaze_ratio, SEM_Gaze_ratio); grid on;e.Color = 'black'; e.LineWidth = 1;
+% set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
+% ylabel("Gaze Ratio", 'FontSize',14)
 
 %% Comparison between all non-eHMI FAV scenarios (i.e motion-changing scenarios)
+% This is comparing sc1, sc4 - sc7 (a total of 5 scenarios, in that order)
+sc_idxs = [1,4,5,6,7];
+mean_Likert = [];
+mean_Mean_DTC = [];
+mean_Cross_time = [];
+mean_Gaze_ratio = [];
+SEM_Likert = [];
+SEM_Mean_DTC = [];
+SEM_Cross_time = [];
+SEM_Gaze_ratio = [];
+for i = 1:length(sc_idxs)
+    mean_Likert = [mean_Likert, mean(LIKERT_TRUST_RATINGS(:,sc_idxs(i)))];
+    mean_Mean_DTC = [mean_Mean_DTC, mean(MEAN_DTU(:,sc_idxs(i)))];
+    mean_Cross_time = [mean_Cross_time, mean(TIME_TO_CROSS(:,sc_idxs(i)))];
+    mean_Gaze_ratio = [mean_Gaze_ratio, mean(GAZE_RATIO(:,sc_idxs(i)))];
+    SEM_Likert = [SEM_Likert, SEM(LIKERT_TRUST_RATINGS(:,sc_idxs(i)))];
+    SEM_Mean_DTC = [SEM_Mean_DTC,SEM(MEAN_DTU(:,sc_idxs(i)))];
+    SEM_Cross_time = [SEM_Cross_time,SEM(TIME_TO_CROSS(:,sc_idxs(i)))];
+    SEM_Gaze_ratio = [SEM_Gaze_ratio,SEM(GAZE_RATIO(:,sc_idxs(i)))];
+end
 
+% T-test
+for i = 1:length(sc_idxs)
+    for j = 1:length(sc_idxs)
+        [H_LIKERT(i,j), P_LIKERT(i,j)]  = ttest2(LIKERT_TRUST_RATINGS(:,sc_idxs(i)), LIKERT_TRUST_RATINGS(:,sc_idxs(j)));
+        [H_DTC(i,j), P_DTC(i,j)]  = ttest2(MEAN_DTU(:,sc_idxs(i)), MEAN_DTU(:,sc_idxs(j)));
+        [H_TTC(i,j), P_TTC(i,j)]  = ttest2(TIME_TO_CROSS(:,sc_idxs(i)), TIME_TO_CROSS(:,sc_idxs(j)));
+        [H_GAZE(i,j), P_GAZE(i,j)]  = ttest2(GAZE_RATIO(:,sc_idxs(i)), GAZE_RATIO(:,sc_idxs(j)));
+    end
+end
+% Signifcance only for Likert and Gaze measures
+fprintf("-------------------------------\n")
+fprintf("Statistical Significance (Likert): sc1 vs sc4, p=%f\n",P_LIKERT(1,2))
+fprintf("                                   sc1 vs sc6, p=%f (*)\n",P_LIKERT(1,4))
+fprintf("                                   sc1 vs sc7, p=%f\n",P_LIKERT(1,5))
+fprintf("                                   sc4 vs sc5, p=%f\n",P_LIKERT(2,3))
+fprintf("                                   sc5 vs sc6, p=%f\n",P_LIKERT(3,4))
+fprintf("                                   sc5 vs sc7, p=%f\n",P_LIKERT(3,5))
+
+fprintf("Statistical Significance (Gaze):   sc1 vs sc6, p=%f (*)\n",P_GAZE(1,4))
+fprintf("                                   sc4 vs sc6, p=%f\n",P_GAZE(2,4))
+fprintf("                                   sc6 vs sc7, p=%f\n",P_GAZE(4,5))
+
+% Plotting
+y_labels = {"Likert Subjective-Trust Score (1-7)", "Mean DTC (uu)", "Cross Time (s)", "Gaze Ratio"};
+x = 1:5;
+x_labels = {"sc1", "sc4", "sc5", "sc6", "sc7"};
+MEANS_combined = [mean_Likert;mean_Mean_DTC;mean_Cross_time;mean_Gaze_ratio];
+SEMS_combined = [SEM_Likert;SEM_Mean_DTC;SEM_Cross_time;SEM_Gaze_ratio];
+figure('Name','No eHMI FAV different Trajectories') 
+set(gcf, 'Color', 'w'); set(gcf, 'Position',  [100, 100, 1100, 700]);
+tiledlayout(2, 2)
+for i = 1:4
+    ax = nexttile();
+    bar(ax, x,MEANS_combined(i,:)); hold on;
+    e= errorbar(x,MEANS_combined(i,:), SEMS_combined(i,:)); grid on;e.Color = 'black'; e.LineWidth = 1;
+    ylabel(y_labels{i}, 'FontSize',14);
+    if i == 2
+        ylim([220,260])
+    end
+    set(ax,'xticklabel',x_labels, 'fontsize',14); %xtickangle(gca,30);
+end
 
 %% Connection to model parameters 
-
+load("dict.mat");
