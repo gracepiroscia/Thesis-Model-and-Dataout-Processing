@@ -283,3 +283,155 @@ end
 
 %% Connection to model parameters 
 load("dict.mat");
+traj_idxs = [8,11,14,29,55]; % The trajectories that were modelled in order [sc1,sc4,sc5,sc6,sc7]
+
+% Obtain markers from trajectory dictionary (each marker in order of sc)
+Vi = []; %initial velocity of the vehicle (km/hr)
+Tbrake = []; %Time when brakes were first applied (s) - Note each trajectory starts from the same DTC (50m)
+Dstop = []; %Distance to the crossing when vehicle stops (not relevant for crawl traj in sc7)
+ACCmax = []; %Maximum deceleration (m/s^2)
+FinalJerk = [];%(m/s^3) (not relevant to crawl traj in sc7 as final speed is constant)
+MaxJerk = []; %("")
+for i = 1:length(traj_idxs)
+    Vi = [Vi,dict(traj_idxs(i)).v_brake];
+    Tbrake = [Tbrake, dict(traj_idxs(i)).t_brake];
+    Dstop = [Dstop, dict(traj_idxs(i)).d_stop];
+    ACCmax = [ACCmax, dict(traj_idxs(i)).a_m];
+    FinalJerk = [FinalJerk, dict(traj_idxs(i)).final_jerk];
+    MaxJerk = [MaxJerk, dict(traj_idxs(i)).jerk_max];
+end
+
+% Print out scenario main vars
+sc_labels = {"sc1", "sc4", "sc5", "sc6", "sc7"};
+fprintf("\n--------------------------------------------------------------------------------\n")
+fprintf("|  Sc  | v_i (km/hr) |  t_b (s) |  d_stop (m)  | v_f (km/hr) | a_max (m/s^2) |  \n")
+fprintf("--------------------------------------------------------------------------------\n")
+formatSpec = "|  %s  |      %i     |     %i    |       %i      |      %i      |      %.2f     | \n";
+for i = 1:length(sc_labels)
+    
+    if i == 5
+        vf = 5;
+    else
+        vf = 0;
+    end
+
+    fprintf(formatSpec, sc_labels{i}, Vi(i), Tbrake(i), Dstop(i), vf, ACCmax(i));
+    fprintf("--------------------------------------------------------------------------------\n")
+end
+
+% Order x variables so that line plots are descriptive
+[~, order_Vi]= sort(Vi);
+[~,order_Tbrake] = sort(Tbrake);
+[~,order_Dstop]= sort(Dstop);
+[~,order_ACCmax]= sort(ACCmax);
+[~,order_FinalJerk]= sort(FinalJerk);
+[~,order_MaxJerk]= sort(MaxJerk);
+
+
+% Get normalised partipant responses
+sc_idxs = [1,4,5,6,7];
+mean_nLikert = [];
+mean_nMean_DTC = [];
+mean_nCross_time = [];
+mean_nGaze_ratio = [];
+for i = 1:length(sc_idxs)
+    mean_nLikert = [mean_nLikert, mean(norm_LIKERT_TRUST_RATINGS(:,sc_idxs(i)))];
+    mean_nMean_DTC = [mean_nMean_DTC, mean(norm_MEAN_DTU(:,sc_idxs(i)))];
+    mean_nCross_time = [mean_nCross_time, mean(norm_TIME_TO_CROSS(:,sc_idxs(i)))];
+    mean_nGaze_ratio = [mean_nGaze_ratio, mean(norm_GAZE_RATIO(:,sc_idxs(i)))];
+end
+
+% Plotting relationships (normalised particpant markers so they can all be
+% observed on the same axis)
+figure('Name', 'Participant Responses and Trajectory Markers');set(gcf, 'Position',  [100, 100, 1100, 700]);
+set(gcf,'Color','w')
+orders = [order_Vi; order_Tbrake;order_Dstop;order_ACCmax;order_FinalJerk;order_MaxJerk];
+x_vars = [Vi; Tbrake;Dstop;ACCmax;FinalJerk;MaxJerk];
+x_labels = {"Initial Velocity (km/hr)", "Time when brakes are first applied (s)", ...
+    "Final Distance to Crossing (m)","Maximum Acceleration (m/s^2)", "Final Jerk (m/s^3)", ...
+    "Maximum Jerk (m/s^3)"}; 
+
+for i = 1:length(x_vars)
+    subplot(3,2,i)
+    x = x_vars(i,:);
+
+    if i == 3  %distance at stopping is irrelevant for sc7
+        x(end) = [];
+        [~, ord] = sort(x);
+        x = x(ord);
+        temp_mean_nLikert = mean_nLikert(1:end-1); %remove last data point
+        temp_mean_nMean_DTC = mean_nMean_DTC(1:end-1);
+        temp_mean_nCross_time =mean_nCross_time(1:end-1);
+        temp_mean_nGaze_ratio = mean_nGaze_ratio(1:end-1);
+        temp_mean_nLikert = temp_mean_nLikert(ord);
+        temp_mean_nMean_DTC = temp_mean_nMean_DTC(ord); %order with new order
+        temp_mean_nCross_time =temp_mean_nCross_time(ord);
+        temp_mean_nGaze_ratio = temp_mean_nGaze_ratio(ord);
+    else
+        x = x(orders(i,:));
+        temp_mean_nLikert = mean_nLikert(orders(i,:));
+        temp_mean_nMean_DTC = mean_nMean_DTC(orders(i,:));
+        temp_mean_nCross_time =mean_nCross_time(orders(i,:));
+        temp_mean_nGaze_ratio = mean_nGaze_ratio(orders(i,:));
+    end
+
+
+    plot(x, temp_mean_nLikert, '-ok'); grid on; hold on;
+    plot(x, temp_mean_nMean_DTC, '-go');
+    plot(x, temp_mean_nCross_time, '-yo');
+    plot(x, temp_mean_nGaze_ratio, '-bo');
+    xlabel(x_labels{i}, 'FontSize',14)
+
+    if i == 1 || i == 3 || i == 5
+        ylabel("Mean Participant Marker (normalised)",'FontSize',14)
+    end
+    
+    if i == 1
+        legend("Likert","DTC", "TTC", "Gaze Ratio")
+    end
+
+end
+
+%% Repeat above but remove sc7 
+figure('Name', 'Participant Responses and Trajectory Markers - sc7 Removed');set(gcf, 'Position',  [100, 100, 1100, 700]);
+set(gcf,'Color','w')
+orders = [order_Vi; order_Tbrake;order_Dstop;order_ACCmax;order_FinalJerk;order_MaxJerk];
+x_vars = [Vi; Tbrake;Dstop;ACCmax;FinalJerk;MaxJerk];
+x_labels = {"Initial Velocity (km/hr)", "Time when brakes are first applied (s)", ...
+    "Final Distance to Crossing (m)","Maximum Acceleration (m/s^2)", "Final Jerk (m/s^3)", ...
+    "Maximum Jerk (m/s^3)"}; 
+
+for i = 1:length(x_vars)
+    subplot(3,2,i)
+    x = x_vars(i,:);
+
+    x(end) = [];
+    [~, ord] = sort(x);
+    x = x(ord);
+    temp_mean_nLikert = mean_nLikert(1:end-1); %remove last data point
+    temp_mean_nMean_DTC = mean_nMean_DTC(1:end-1);
+    temp_mean_nCross_time =mean_nCross_time(1:end-1);
+    temp_mean_nGaze_ratio = mean_nGaze_ratio(1:end-1);
+    temp_mean_nLikert = temp_mean_nLikert(ord);
+    temp_mean_nMean_DTC = temp_mean_nMean_DTC(ord); %order with new order
+    temp_mean_nCross_time =temp_mean_nCross_time(ord);
+    temp_mean_nGaze_ratio = temp_mean_nGaze_ratio(ord);
+
+
+    plot(x, temp_mean_nLikert, '-ok'); grid on; hold on;
+    plot(x, temp_mean_nMean_DTC, '-go');
+    plot(x, temp_mean_nCross_time, '-yo');
+    plot(x, temp_mean_nGaze_ratio, '-bo');
+    xlabel(x_labels{i}, 'FontSize',14)
+
+    if i == 1 || i == 3 || i == 5
+        ylabel("Mean Participant Marker (normalised)",'FontSize',14)
+    end
+    
+    if i == 1
+        legend("Likert","DTC", "TTC", "Gaze Ratio")
+    end
+
+end
+
+
