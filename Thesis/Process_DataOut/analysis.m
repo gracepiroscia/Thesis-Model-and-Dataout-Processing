@@ -281,6 +281,21 @@ for i = 1:4
     set(ax,'xticklabel',x_labels, 'fontsize',14); %xtickangle(gca,30);
 end
 
+% box and whisker plot
+figure('Name','No eHMI FAV different Trajectories- Box plot') 
+set(gcf, 'Color', 'w'); set(gcf, 'Position',  [100, 100, 1100, 700]);
+combined_matrices(:,:,1) = LIKERT_TRUST_RATINGS;
+combined_matrices(:,:,2) = MEAN_DTU;
+combined_matrices(:,:,3) = TIME_TO_CROSS;
+combined_matrices(:,:,4) = GAZE_RATIO;
+tiledlayout(2, 2)
+for i = 1:4
+    ax = nexttile();
+    boxplot(ax,combined_matrices(:,sc_idxs,i))
+    ylabel(y_labels{i}, 'FontSize',14); grid on;
+    set(ax,'xticklabel',x_labels, 'fontsize',14); %xtickangle(gca,30);
+end
+
 %% Connection to model parameters 
 load("dict.mat");
 traj_idxs = [8,11,14,29,55]; % The trajectories that were modelled in order [sc1,sc4,sc5,sc6,sc7]
@@ -318,6 +333,14 @@ for i = 1:length(sc_labels)
     fprintf(formatSpec, sc_labels{i}, Vi(i), Tbrake(i), Dstop(i), vf, ACCmax(i));
     fprintf("--------------------------------------------------------------------------------\n")
 end
+fprintf("--------------------------------------------------------------------------------\n")
+fprintf("-------------------------Single Factor Changes Summary--------------------------\n")
+fprintf("sc1 -> sc4: (*) distance to crossing at stop reduces by 2m\n")
+fprintf("sc1 -> sc5: longer wait till brakes applied - slightly bigger decel\n")
+fprintf("sc4 -> sc6: (*) higher V_i - bigger decel as a consequence\n")
+fprintf("sc7 -> all: (***)crawling at 5km/hr\n")
+fprintf("--------------------------------------------------------------------------------\n")
+
 
 % Order x variables so that line plots are descriptive
 [~, order_Vi]= sort(Vi);
