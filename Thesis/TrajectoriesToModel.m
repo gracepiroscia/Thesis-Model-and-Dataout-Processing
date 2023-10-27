@@ -54,12 +54,14 @@ for i = 1:length(idxs)
     dist = dict(idxs(i)).vd_traj;
     vel  = dict(idxs(i)).vt_traj;
 
-    plot(dist,vel)
+    p  = plot(dist,vel);
+    p.LineWidth = 2;
 
 end
-xlabel("Distance (m)")
-ylabel("Velocity (km/hr)")
-legend(llabels)
+xlabel("time (s)", 'FontSize',14)
+ylabel("Distance (m)", 'FontSize',14)
+title('Chosen Trajectories', 'FontSize',16)
+legend("1", "2", "3", "4", "5")
 grid on;
 
 %% Distance-time plots
@@ -71,12 +73,14 @@ for i = 1:length(idxs)
     dist = dict(idxs(i)).vd_traj;
     time_s  = dict(idxs(i)).time;
 
-    plot(time_s,dist)
+    p = plot(time_s,dist);
+    p.LineWidth = 2;
 
 end
-xlabel("time (s)")
-ylabel("Distance (m)")
-legend(llabels)
+xlabel("time (s)", 'FontSize',14)
+ylabel("Distance (m)", 'FontSize',14)
+title('Chosen Trajectories', 'FontSize',16)
+legend("1", "2", "3", "4", "5")
 grid on;
 
 %% Distance -frames plots for help with maya construction
@@ -96,3 +100,20 @@ xlabel("Frames (24fps)")
 ylabel("Distance (m)")
 legend(llabels)
 grid on;
+
+%% Velocity-time plots
+figure(4); 
+set(gcf, 'Color','w'); 
+% regular traj
+hold on
+for i = 1:length(idxs)
+    vel  = dict(idxs(i)).vt_traj;
+    time_s  = dict(idxs(i)).time;
+    p = plot(time_s, vel);
+    p.LineWidth = 2;
+end 
+grid on
+xlabel('Time (s)', 'FontSize',14)
+ylabel('Velocity (km/hr)', 'FontSize',14)
+title('Chosen Trajectories', 'FontSize',16)
+legend("1", "2", "3", "4", "5")

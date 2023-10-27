@@ -208,5 +208,14 @@ subtitle(strcat('RSQR >= ',num2str(r_sqr_thresh)))
 ylabel('m')
 xlabel('idx')
 
+%% Basic stats
+N_well_fit = length(Narrowed_stopTraject_rsqr) + length(Narrowed_crawlTraject_rsqr);
+Median_rsqr = median([Narrowed_stopTraject_rsqr;Narrowed_crawlTraject_rsqr]);
+N_tot = length(StopTraject_rsqr)+ length(CrawlTraject_rsqr);
+fprintf("Median GOF (Rsqr): %f\n",Median_rsqr);
+fprintf("Out of %i trajectories, %i trajectories had a GOF > %f\n",N_tot, N_well_fit, r_sqr_thresh);
 
-
+median_m = median([Narrowed_stopTraject_m;Narrowed_crawlTraject_m]);
+mean_m = mean([Narrowed_stopTraject_m;Narrowed_crawlTraject_m]);
+fprintf("Mean m (out of trajectories with rsqr > 0.9): %f\n", mean_m);
+fprintf("Median m (out of trajectories with rsqr > 0.9): %f\n", median_m);
