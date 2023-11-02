@@ -43,24 +43,28 @@ figure(1)
 set(gcf,'Color', 'w')
 subplot(1,3,1)
 plot(LIKERT_TRUST_RATINGS_col, MEAN_DTU_col,'o')
-ylabel("Mean DTC (uu)")
-xlabel("Likert Trust Rating (1-7)")
+ylabel("Mean DTC (uu)", 'FontSize',14)
+xlabel("Likert Trust Rating (1-7)", 'FontSize',14)
 txt = "R = " + num2str(R(1,2));
-text(2,280,txt)
+t = text(2,280,txt);
+t.FontSize = 14;
 grid on;
 subplot(1,3,2)
 plot(LIKERT_TRUST_RATINGS_col, GAZE_RATIO_col,'o')
-xlabel("Likert Trust Rating (1-7)")
-ylabel("Gaze Ratio"); grid on;
+xlabel("Likert Trust Rating (1-7)", 'FontSize',14)
+ylabel("Gaze Ratio", 'FontSize',14); grid on;
+title("Comparison between Pedestrian Metrics", 'FontSize',16)
 txt = "R = " + num2str(R(1,3));
-text(2,0.35,txt)
+t = text(2,0.35,txt);
+t.FontSize = 14;
 subplot(1,3,3)
 plot(LIKERT_TRUST_RATINGS_col, TIME_TO_CROSS_col,'o')
-xlabel("Likert Trust Rating (1-7)")
-ylabel("Time to Cross (s)")
+xlabel("Likert Trust Rating (1-7)", 'FontSize',14)
+ylabel("Time to Cross (s)", 'FontSize',14)
 grid on;
 txt = "R = " + num2str(R(1,4));
-text(2,16,txt)
+t = text(2,16,txt);
+t.FontSize = 14;
 A = [LIKERT_TRUST_RATINGS_col,MEAN_DTU_col,GAZE_RATIO_col, TIME_TO_CROSS_col];
 R = corrcoef(A);
 
@@ -151,9 +155,11 @@ x_labels = {"eHMI FAV", "Human-Driven", "no eHMI FAV"} ;
 figure('Name','Differences in eHMI - Likert Recognition > 5')
 set(gcf,'Color', 'w'); set(gcf, 'Position',  [100, 100, 1100, 700]); subplot(2,2,1)
 bar(x,mean_Likert_filt); hold on;
-e = errorbar(x,mean_Likert_filt, SEM_Likert_filt); grid on; e.Color = 'black'; e.LineWidth = 1;
+e = errorbar(x,mean_Likert_filt, SEM_Likert_filt); grid on; e.Color = 'black'; e.LineWidth = 2;
 set(gca,'xticklabel',x_labels, 'fontsize',14); xtickangle(gca,30);
 ylabel("Likert Subjective-Trust Score (1-7)", 'FontSize',14)
+title("Trust in Vehicle", 'FontSize',16)
+ylim([0,7])
 subplot(2,2,2)
 bar(x,mean_Mean_DTC_filt); hold on;
 e= errorbar(x,mean_Mean_DTC_filt, SEM_Mean_DTC_filt); grid on;e.Color = 'black'; e.LineWidth = 1;
@@ -443,7 +449,7 @@ for i = 1:length(x_vars)
 
     plot(x, temp_mean_nLikert, '-ok'); grid on; hold on;
     plot(x, temp_mean_nMean_DTC, '-go');
-    plot(x, temp_mean_nCross_time, '-yo');
+    plot(x, temp_mean_nCross_time, '-mo');
     plot(x, temp_mean_nGaze_ratio, '-bo');
     xlabel(x_labels{i}, 'FontSize',14)
 

@@ -46,7 +46,7 @@ clear;
 % Will plot per participant per scenario the DTC with time and gaze bool
 % with time. Will wait for user to press any key to continue to next
 % scenario.
-plot_data = false;
+plot_data = true;
 
 
 %% Thresholds 
