@@ -11,3 +11,13 @@ The scripts used to perform model validation should be executed in this order:
 3. "CombineIntervalsOfInterest.m": collate the structures produced in "TimeIntervalsOfInterest.m" into a single MATLAB structure "Combined_Trajectories.mat".
 4. "DecelModelFitting.m": fits the velocity profiles from "Combined_Trajectories.mat" with the model, using a MATLAB optimizer. Outputs the goodness-of-fit (R^2) for each of the trajectories, as well as general statistics for how the model performed as a whole.
 
+### Chosen Trajectories
+- Script "TrajectoriesToModel.m" plots the five trajectories (velocity with time, velocity with distance, and distance with frames for animation programming) chosen to simulate for the thesis study (justification found in paper).
+
+### Measures
+The scripts used to process the participant data are outlined below and should be executed in the given order. All of these scripts are within the "Process_DataOut" directory
+1. "csv_import.m": process the raw .csv files collected during participant trials for both the objective (unreal engine measurements) and subjective (Likert-Scale questionnaire) data, collating them into a single struct "data_out.mat".  There is the option to visualise this data per participant and press any key to move to the next participant plots, as controlled by setting the variable "plot_data" to true or false.
+2. "process.m": script processes "data_out.mat" for the objective data, producing the markers used in the thesis (average distance-to-collision-zone, etc.).
+  
+### Analaysis of results
+All of the results, including plots and p-values, given in the thesis paper, can be reproduced by running "analysis.m".
